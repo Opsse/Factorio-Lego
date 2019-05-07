@@ -1,6 +1,7 @@
 const Blueprint = require('factorio-blueprint');
 const fs = require('fs');
 var path = require('path');
+const zlib = require('zlib');
 
 var blueprintsPath = './blueprints'
 var booksPath = './out/books'
@@ -54,58 +55,70 @@ function toTitleCase(str) {
 			    .join(' ');
 }
 
-fs.readdir(blueprintsPath, function (err, folders) {
-  if (err) {
-    console.error("Could not list the directory.", err);
-    process.exit(1);
+// Because the function in factorio-blueprint return undefined 
+function toBookFixed(blueprints, activeIndex = 0) {
+  let obj = {
+    blueprint_book: {
+      blueprints: blueprints.map(bp => bp.toObject()),
+      item: 'blueprint-book',
+      active_index: activeIndex,
+      version: 0
+    }
   }
 
-  console.log("=================== " + folders.length + " directories found ===================")
+  return '0' + zlib.deflateSync(JSON.stringify(obj)).toString('base64');
+}
 
-  // Make a book for each directory
-  folders.forEach(function (folder, index) {
-  	var folderPath = path.join(blueprintsPath, folder);
-  	var bookName = toTitleCase(folder)
+var folders = fs.readdirSync(blueprintsPath)
 
-    var bookBlueprints = []
+console.log("=================== " + folders.length + " directories found ===================")
 
-    fs.readdir(folderPath, function (err, files) {
-      if (err) {
-        console.error("Could not list the directory.", err);
-        process.exit(1);
-      }
+// Make a book for each directory
+folders.forEach(function (folder, index) {
+  var folderPath = path.join(blueprintsPath, folder);
+  var bookName = toTitleCase(folder)
 
-      files.forEach(function (file, index) {
-        var filePath = path.join(folderPath, file);
-        if (fs.lstatSync(filePath).isFile())
-        {
-          var encodedText = fs.readFileSync(filePath,'utf8');
-          const importedBlueprint = new Blueprint(encodedText)
-          bookBlueprints.push(importedBlueprint);
-        }
-      })
-    })
+  var bookBlueprints = []
 
-    console.log(bookBlueprints)
-    Blueprint.toBook(bookBlueprints)
+  var files = fs.readdirSync(folderPath)
+
+  files.forEach(function (file, index) {
+    var filePath = path.join(folderPath, file);
+    if (fs.lstatSync(filePath).isFile())
+    {
+      var blueprintStr = fs.readFileSync(filePath,'utf8');
+      const importedBlueprint = new Blueprint(blueprintStr)
+      bookBlueprints.push(importedBlueprint);
+    }
+  })
+
+  var bookStr = toBookFixed(bookBlueprints)
+
+  var savePath = path.join(booksPath, folder + ".txt")
+  fs.writeFile(savePath, bookStr, function(err) {
+    if(err) {
+        return console.log(err);
+    }
 
     console.log(bookName + ": " + bookBlueprints.length + " blueprints compiled")
-  })
+  });
 })
 
 
 /*
-var text = fs.readFileSync('./frames/frame_1x1.txt','utf8');
-
-console.log(text);
-
-// Import a blueprint using a blueprint string
-const importedBlueprint = new Blueprint("");
+// Create a blueprint with nothing in it
+const myBlueprint = new Blueprint();
 
 // Modify the blueprint!
 myBlueprint.createEntity('transport-belt', { x: 0, y: 0 }, Blueprint.UP);
 //importedBlueprint.entities[0].remove();
 
+var blueprints = [myBlueprint]
+activeIndex = 0
+
+
+
+console.log(bookStr)
 // Export the string to use in-game
-console.log(myBlueprint.encode());
+//console.log(Blueprint.toBook([myBlueprint]));
 */
