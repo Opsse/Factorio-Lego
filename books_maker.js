@@ -46,6 +46,9 @@ Blueprint.setEntityData({
   artillery_shell: {
     type: 'item'
   },
+  artillery_targeting_remote: {
+    type: 'item'
+  },
 })
 
 function toTitleCase(str) {
