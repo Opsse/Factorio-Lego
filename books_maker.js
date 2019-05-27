@@ -1,7 +1,5 @@
 const Blueprint = require('factorio-blueprint');
 const fs = require('fs');
-var path = require('path');
-const zlib = require('zlib');
 
 var blueprintsPath = './blueprints'
 var booksPath = './out/books'
@@ -49,6 +47,15 @@ Blueprint.setEntityData({
   artillery_targeting_remote: {
     type: 'item'
   },
+  uranium_processing: {
+    type: 'recipe'
+  },
+  nuclear_fuel_reprocessing: {
+    type: 'recipe'
+  },
+  kovarex_enrichment_process: {
+    type: 'recipe'
+  }
 })
 
 function toTitleCase(str) {
@@ -56,20 +63,6 @@ function toTitleCase(str) {
 			    .split('_')
 			    .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
 			    .join(' ');
-}
-
-// Because the function in factorio-blueprint return undefined 
-function toBookFixed(blueprints, activeIndex = 0) {
-  let obj = {
-    blueprint_book: {
-      blueprints: blueprints.map(bp => bp.toObject()),
-      item: 'blueprint-book',
-      active_index: activeIndex,
-      version: 0
-    }
-  }
-
-  return '0' + zlib.deflateSync(JSON.stringify(obj)).toString('base64');
 }
 
 var folders = fs.readdirSync(blueprintsPath)
@@ -95,33 +88,13 @@ folders.forEach(function (folder, index) {
     }
   })
 
-  var bookStr = toBookFixed(bookBlueprints)
+  var bookStr = Blueprint.toBook(bookBlueprints)
 
   var savePath = path.join(booksPath, folder + ".txt")
   fs.writeFile(savePath, bookStr, function(err) {
     if(err) {
         return console.log(err);
     }
-
     console.log(bookName + ": " + bookBlueprints.length + " blueprints compiled")
   });
 })
-
-
-/*
-// Create a blueprint with nothing in it
-const myBlueprint = new Blueprint();
-
-// Modify the blueprint!
-myBlueprint.createEntity('transport-belt', { x: 0, y: 0 }, Blueprint.UP);
-//importedBlueprint.entities[0].remove();
-
-var blueprints = [myBlueprint]
-activeIndex = 0
-
-
-
-console.log(bookStr)
-// Export the string to use in-game
-//console.log(Blueprint.toBook([myBlueprint]));
-*/
