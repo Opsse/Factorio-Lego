@@ -1,14 +1,12 @@
 const Blueprint = require('factorio-blueprint');
 const fs = require('fs');
+var path = require('path');
 
 var blueprintsPath = './blueprints'
 var booksPath = './out/books'
 
 Blueprint.setEntityData({
   nuclear_fuel: {
-    type: 'item'
-  },
-  solid_fuel_from_light_oil: {
     type: 'item'
   },
   automation_science_pack: {
@@ -20,9 +18,6 @@ Blueprint.setEntityData({
   logistic_science_pack: {
     type: 'item'
   },
-  signal_check: {
-    type: 'item'
-  },
   utility_science_pack: {
     type: 'item'
   },
@@ -30,12 +25,6 @@ Blueprint.setEntityData({
     type: 'item'
   },
   artillery_wagon: {
-    type: 'item'
-  },
-  signal_info: {
-    type: 'item'
-  },
-  signal_dot: {
     type: 'item'
   },
   belt_immunity_equipment: {
@@ -47,6 +36,15 @@ Blueprint.setEntityData({
   artillery_targeting_remote: {
     type: 'item'
   },
+  signal_info: {
+    type: 'virtual'
+  },
+  signal_dot: {
+    type: 'virtual'
+  },
+  signal_check: {
+    type: 'virtual'
+  },
   uranium_processing: {
     type: 'recipe'
   },
@@ -55,7 +53,10 @@ Blueprint.setEntityData({
   },
   kovarex_enrichment_process: {
     type: 'recipe'
-  }
+  },
+  solid_fuel_from_light_oil: {
+    type: 'recipe'
+  },
 })
 
 function toTitleCase(str) {
